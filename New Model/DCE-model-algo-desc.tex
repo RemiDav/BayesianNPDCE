@@ -91,27 +91,70 @@ A product $x_m$ belongs to a class $\Lambda_k$ if and only if $ x_{m1} \in \Lamb
 
 \section{Individual preferences}
 
-We have a population of individuals, each one choosing a product within a set at a time $t$. The choice of an individual $n$ is done by maximizing a function $u(x,\psi)$ representing the preferences this individual over the set of available choices $X_{nt}$, where $\psi$ is some set of parameters. The choice maximizing the individual preferences is denoted $x^*$. The preferences for each individual are built by attributing some value to various classes of products. The value of a class can be positive or negative. For instance, at a time $t$ an individual $n$ attributes the value $\theta_{nkt}$ to the class $\Lambda_k$. The value of a given product for an individual is obtained by summing the values of all the classes it belongs to. If the value of a class $k$ is zero for an individual, we say that the individual does not possess the feature $k$. It means that whether a product belongs to the class $k$ or not does not change the value of the product for the given individual.
+We have a population of $N$ individuals sequentially choosing $T$ times one product within a set. The choice of an individual $n$ at a time $t$ is done by maximizing a function $u_t(x,\psi_n)$ representing the preferences this individual over the set of available choices $X_{nt}$, where $\psi_n$ is some set of parameters. The choice maximizing the individual preferences is denoted $x^*$. The preferences for each individual are built by attributing some value to various classes of products. The value of a class can be positive or negative. For instance, at a time $t$ an individual $n$ attributes the value $\theta_{nkt}$ to the class $\Lambda_k$. The value of a given product for an individual is obtained by summing the values of all the classes it belongs to. If the value of a class $k$ is zero for an individual, we say that the individual does not possess the feature $k$. It means that whether a product belongs to the class $k$ or not does not change the value of the product for the given individual.
 
-Within the population, when two individuals have a non-zero $\theta_{nkt}$ for a class of products $k$, we say that they share the common feature $k$.The values come from a common distribution $f_k(\theta_{nkt})$. It is important to note however that the value of the class does not need to be the same for both individuals sharing the feature. One individual with feature $k$ may attribute a positive value to the class $k$ while the other attributes a negative value. Some features can be shared by many individuals, while some other features can be rare. 
+Within the population, when two individuals have a non-zero value $\theta_{nkt}$ for a class of products $k$, we say that they share the common feature $k$. It is important to note however that the value of the class does not need to be the same for both individuals sharing the feature. One individual with feature $k$ may attribute a positive value to the class $k$ while the other attributes a negative value. Two individuals sharing a feature $k$ means that they are both sensitive to the corresponding class of products. Some features can be shared by many individuals, while some other features can be rare. 
 Note that there is some redundancy: a same class can appear in two different features. The two classes of products $\Lambda_k$ and $\Lambda_{k'}$ can be identical ($\Lambda_k = \Lambda_{k'}$), but to be respectively associated with a $\theta_{nk}$ and a $\theta_{nk'}$ following different distributions.
 
-The total number of features in the population is potentially infinite. However, in a given sample only a finite number of features are realized. The features present in our sample are numbered from $1$ to $K_+$.
+The total number of features in the population is potentially infinite. However, in a given sample only a finite number of features are realized. The features present in our sample are ordered and numbered from $1$ to $K_+$ for convenience.
 
 Formally, the value of an object $x$ for and individual $n$ at time $t$ can be written:
 \begin{equation}\label{e:uff}
-	u(x,\psi) = \sum_{k=1}^{K_+} \theta_{nkt} \cdot \mathds{1}(x \in \Lambda_k),
+	u_t(x,\psi_n) = \sum_{k=1}^{K_+} \theta_{nkt} \cdot \mathds{1}(x \in \Lambda_k),
 \end{equation}
 
-where $\psi$ contains the $\theta_{nkt}$ and the $\Lambda_k$.
+where $\psi_n$ contains the set of $\theta_{nkt}$ and the set of $\Lambda_k$:
+$$ \psi_n = \left\{ \{\theta_{nkt}\}_{t=1}^T , \Lambda_{k} \right\}_{k=1}^{K_+} $$
 
-The value $\theta_{nk}$ may be decomposed into four parts as follow:
+For convenience, the value $\theta_{nk}$ may be decomposed into four parts as follow:
 $$ \theta_{nkt} = z_{nk} \cdot (-1)^{s_{nk}} \cdot (\theta_{nk} + \epsilon_{nkt}) $$
-where $z_{nk}$ is a binary variable indicating whether individual $n$ possesses feature $k$, $s_{nk}$ is a binary variable that indicates whether the value of the class $k$ for individual $n$ is positive or negative, $\theta_{nk}$ is the stable part of the value in the consumer preferences, and $\epsilon_{nkt}$ is a tremble part. 
+where $z_{nk}$ is a binary variable indicating whether individual $n$ possesses feature $k$, $s_{nk}$ is a binary variable that indicates whether the value of the class $k$ for individual $n$ is positive or negative, $\theta_{nk}$ is the stable part of the value in the consumer preferences, and $\epsilon_{nkt}$ is a tremble part. We can rewrite $\psi_n$ as:
+$$ \psi_n = \left\{ z_{nk}, s_{nk},\theta_{nk}, \{\epsilon_{nkt}\}_{t=1}^T , \Lambda_{k} \right\}_{k=1}^{K_+} .$$
+
+It is possible that we want to restrict preferences such that they only increase in some attributes.
+For such attribute, the active levels are restricted to be of the form $\{l,l+1,\ldots,L\}$ if the the class $\Lambda_k$ is associated with a positive value ($s_{nk}=0$), and of the form $\{1,\ldots,l-1,l\}$ if the class is associated with a negative value ($s_{nk}=1$). We denote the first case as a upper active levels, and the second as lower active levels. If a class $\Lambda_k$ has at least one active monotone attribute, we call it a monotone class.
+Note that if several monotone attributes are active in the class, they should all be of the same type. If all the active monotone attribute are of the upper active levels type, we say that the class has a positive polarity and denote it $\rho_k=0$. conversely, if the monotone attributes are of the lower active levels type, we say that the class has a negative polarity and denote it $\rho_k=1$.
+
+
+?????????????????????QUESTION??????????????????
+
+Shall I write $u_t(x,\psi_n)$ with $\psi_n = \left\{ z_{nk}, s_{nk},\theta_{nk}, \{\epsilon_{nkt}\}_{t=1}^T , \Lambda_{k} \right\}_{k=1}^{K_+}$, 
+
+Or $u(x,\psi_{nt})$, with $\psi_{nt} = \left\{ z_{nk}, s_{nk},\theta_{nk}, \epsilon_{nkt}, \Lambda_{k} \right\}_{k=1}^{K_+}$ ?
+
+in the second case, the various $\psi_{nt}$ have common parameters indexed by $nk$, which may look weird. I used the first approach where the index $t$ is on $u_t$ because the $t$ is relevant both for the component $\epsilon_{nkt}$ of $\psi_n$ to retain, and for the choice set / observation considered. 
 
 \section{Hierarchichal model}
 
 The Bayesian framework gives us a simple and intuitive way to model our uncertainty about the various parameters. We have to define how the various variables and parameters are distributed in order to be able to obtain a posterior distribution.
+
+Model parameters:
+$$ \{ \{\psi_n\}_{n=1}^N,\{\Lambda_{k}\}_{k=1}^{K_+} \} 
+= \left\{ \{\{\epsilon_{nkt}\}_{t=1}^T, z_{nk},s_{nk}, \theta_{nk} \}_{n=1}^N, \Lambda_{k} \right\}_{k=1}^{K_+}$$
+
+We add a hierarchical level requiring the addition of the following hyper-parameters:
+$$ \left\{  \{\pi_k^z, \pi_k^s\}_{k=1}^{K_+}, \alpha^\theta, \sigma^\theta  \right\} $$
+
+The joint distribution of the data and parameters satisfies the conditional independence relationships implied by the following decomposition:
+\begin{align}
+		& P\left( \{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^N, \left\{ \{\{\epsilon_{nkt}\}_{t=1}^T, z_{nk},s_{nk}, \theta_{nk} \}_{n=1}^N, \Lambda_{k},\pi_k^z, \pi_k^s \right\}_{k=1}^{K_+},\alpha^\theta, \sigma^\theta \right) \\
+	=	& \label{eq:likelihood} \prod_t \prod_{n} P\left(x_{nt}^*|\{\epsilon_{nkt},z_{nk},s_{nk}, \theta_{nk},\Lambda_{k}  \}_{k=1}^{K_+}\right) \\
+		& \label{eq:prior} \times \prod_k \left[
+			\prod_n 
+				\left( \prod_t P(\epsilon_{nkt}|\alpha^\theta,\sigma^\theta,z_{nk}) \right)
+				P(z_{nk}|\pi_k^z) 
+				P(s_{nk}|\pi_k^s,z_{nk})
+				P(\theta_{nk}|\alpha^\theta, \sigma^\theta, z_{nk})
+				P(\Lambda_{k})
+		\right] \\
+		&  \label{eq:hprior}\times
+		\left(\prod_k
+			P(\pi_k^z)
+			P(\pi_k^s)\right) 
+		P(\alpha^\theta)
+		P(\sigma^\theta),
+\end{align}
+where line (\ref{eq:likelihood}) is the likelihood, line (\ref{eq:prior}) is the prior and line (\ref{eq:hprior}) is the hyper prior.
 
 \subsection{Features allocation}
 
@@ -130,7 +173,7 @@ expressed by that column, taking the first row as the most significant bit". Two
 Using this process, the average number of feature per individual will be $\alpha^z$. The $\beta^z$ parameter lets us set the average overall number of features observed in a sample. The expected overall number of features present in a sample will be $\alpha^z \sum_{n=1}^{N} \frac{\beta^z}{\beta^z + n - 1}$. Depending on $\beta$, this number can range from $\alpha^z$ where everybody share the same features, to $N\alpha^z$ where no features are shared.
 
 Here are three matrices produced using the described process using various parameter values:
-\begin{figure}[!ht]
+\begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{img/IBP2params.png}
 	\caption{Three matrices produced with the IBP.\citep{griffiths2011indian}}
@@ -138,54 +181,38 @@ Here are three matrices produced using the described process using various param
 
 \subsection{Attributes with monotone preferences and $\Lambda_k$} \label{sec:lambda}
 
-The second object of interest are the product classes $\Lambda_k$ associated with each feature. 
-We need to define a distribution over the space of Cartesian products of possible $\Lambda_{ki}$ excluding the empty set. 
-While there is no closed form for the distribution of $\Lambda_k$ we can define a generating process in two steps. The first step generates the set of active attributes $C_{k}$ with cardinality $c_k$ and the second step determines the set of active levels $\Lambda_{ki}$ for each active attribute.
+The class $\Lambda_k$ can be denoted as a set of active attributes $C_k$ with cardinality $c_k$, and for each active attribute $i\in C_k$, a set of active levels $\Lambda_{ki}$ with cardinality $\lambda_{ki}$.
 
-It is possible that we want to restrict preferences such that they only increase in some attributes.
-For such attribute, the active levels are restricted to be of the form $\{l,l+1,\ldots,L\}$ if the the class $\Lambda_k$ is associated with a $s_{nk}=1$, and of the form $\{1,\ldots,l-1,l\}$ if the class is associated with a $s_{nk}=0$. We denote the first case as a upper active levels, and the second as lower active levels. If a class $\Lambda_k$ has at least one active monotone attribute, we denote it by a corresponding indicator $m_k=1$, and $m_k=0$ otherwise.
-Note that if several monotone attributes are active in the class, they should all be of the same type. If all the active monotone attribute are of the upper active levels type, we say that the class has a positive polarity and denote it $\rho_k=1$. conversely, if the monotone attributes are of the lower active levels type, we say that the class has a negative polarity and denote it $\rho_k=0$.
+The prior distribution of $\Lambda_k$ can be decomposed as follow:
+\begin{equation}
+	P(\Lambda_{k}) = P(c_k) \cdot P(\rho_k) \cdot P(C_k|c_k) \cdot \prod_{i\in C_k} P(\Lambda_{ki}|\rho_k)
+\end{equation}
 
-This leads us to the following generating process for drawing a $\Lambda_k$:
+The corresponding distributions are detailed below:
 \begin{itemize}
-	\item Draw the number of active attributes $A \sim U(1,...,L)$
-	\item Draw polarity $\rho_k \sim Bernoulli(0.5)$
-	\item Initialize the monotonicity indicator $m_k = 0$
-	\item Draw $A$ attributes represented by the set $L^*$: 
-	\item For each $i \in L^*$:
+	\item The number of active attributes is uniformly distributed on $\{1,...,L\}$:
+	$$c_k \sim U(1,...,L)$$
+	\item The polarity has equal probability of being positive or negative:
+	$$\rho_k \sim Bernoulli(0.5)$$
+	\item The attributes share the same probability of being active. The probability of observing a set of active attributes $C_k$ is consequently:
+	$$ P(C_k|c_k) = \binom{L}{c_k}^{-1}$$ 
+	\item The probability of observing the set of active levels $\Lambda_{ki}$ depends on several factors:
 	\begin{itemize}
-		\item If attribute $i$ is monotone :
-		\begin{itemize}
-			\item Set $m_k = 1$
-			\item Draw one level $l \sim U(1,...,L_i)$
-			\item If $\rho_k = 1$:
-			\begin{itemize}
-				\item Set level $l$ and all level above to active
-			\end{itemize}
-			\item If $\rho_k = 0$:
-			\begin{itemize}
-				\item Set level $l$ and all level below to active
-			\end{itemize}
-		\end{itemize}
-		\item Else :
-		\begin{itemize}
-			\item Draw the number of active levels $a \sim U(1,...,L_i-1)$
-			\item Draw $a$ level without replacement and set them to active
-		\end{itemize}
-	\end{itemize}
-	\item For each $i \notin L^*$:
-	\begin{itemize}
-		\item Set all levels of attribute $i$ to active
+		\item If $\Lambda_{ki}$ is monotone:
+		$$P(\Lambda_{ki}|\rho_k) =  
+			\begin{cases}
+				1/L_i,& \text{if } \Lambda_{ki} \text{ has upper active levels and } \rho_k = 0\\
+				1/L_i,& \text{if } \Lambda_{ki} \text{ has lower active levels and } \rho_k = 1\\
+				0,              & \text{otherwise}
+			\end{cases}
+		$$
+		\item If $\Lambda_{ki}$ is not monotone, it does not depend on the polarity $\rho_k$. The number of active levels $\lambda_{ki}$ is uniformly distributed on $\{1,...,L_i\}$ and each level has an equal probability of being active.
+		\begin{align*}
+			P(\Lambda_{ki}|\rho_k) & = P(\Lambda_{ki}|\lambda_{ki})\cdot P(\lambda_{ki}) \\
+				& = \binom{L_i}{\lambda_{ki}}^{-1} \cdot \frac{1}{\lambda_{ki}}
+		\end{align*}
 	\end{itemize}
 \end{itemize}
-
-A more general alternative could be used for the generating process. We first draw the number of active attributes $c_k$ with a completely flexible distribution $\pi^\Lambda$ is an n-vector giving the prior distribution of number of active attributes in utility term $k$. Given the number of active attributes, the set of active attributes is given by {\em conditional} Poisson sampling from the set $\{1,\ldots,L\}$, with sample size $c_{k}$ and parameter vector $\lambda \in \mathbb{R}^L$.
-The vector $\lambda$ gives the relative importance of the various attributes.
-A higher weight $\lambda_i$ indicates that attribute $i$ is more likely to be active in any given utility term.
-Conditional Poisson sampling guarantees that the random set $C_{k}$ has cardinality $c_{k}$ with probability one.
-The normalization factor associated with conditional Poisson sampling is not known in closed form, but there is an efficient algorithm for computing it.
-Given the set $C_{k}$ of active attributes, subsets $\Lambda_{ki}$, $i \in C_{k}$, are mutually independent.
-For non monotone attributes, the set of active levels is obtained by Poisson sampling, truncated to assign probability zero to both the empty set and the the set containing all the possible levels. For monotone attributes, the set is drawn following the same process as in the simple case.
 
 \subsection{Other parameters}
 
