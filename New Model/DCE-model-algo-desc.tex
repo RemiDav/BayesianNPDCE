@@ -9,7 +9,6 @@
 \usepackage[latin1]{inputenc}
 \usepackage{times}
 \usepackage[T1]{fontenc}
-\usepackage{tikz-qtree}
 \usepackage{tabularx}
 \usepackage{dsfont}
 \usepackage{algorithm}
@@ -133,7 +132,7 @@ $$ \{ \{\psi_n\}_{n=1}^N,\{\Lambda_{k}\}_{k=1}^{K_+} \}
 = \left\{ \{\{\epsilon_{nkt}\}_{t=1}^T, z_{nk},s_{nk}, \theta_{nk} \}_{n=1}^N, \Lambda_{k} \right\}_{k=1}^{K_+}$$
 
 We add a hierarchical level requiring the addition of the following hyper-parameters:
-$$ \left\{  \{\pi_k^z, \pi_k^s\}_{k=1}^{K_+}, \alpha^\theta, \sigma^\theta  \right\} $$
+$$ \left\{  \{\pi_k^s\}_{k=1}^{K_+}, \alpha^\theta, \sigma^\theta  \right\} $$
 
 The joint distribution of the data and parameters satisfies the conditional independence relationships implied by the following decomposition:
 \begin{align}
@@ -141,8 +140,8 @@ The joint distribution of the data and parameters satisfies the conditional inde
 	=	& \label{eq:likelihood} \prod_t \prod_{n} P\left(x_{nt}^*|\{\epsilon_{nkt},z_{nk},s_{nk}, \theta_{nk},\Lambda_{k}  \}_{k=1}^{K_+}\right) \\
 		& \label{eq:prior} \times \prod_k \left[
 			\prod_n 
-				\left( \prod_t P(\epsilon_{nkt}|\alpha^\theta,\sigma^\theta,z_{nk}) \right)
-				P(z_{nk}|\pi_k^z) 
+				P(Z)
+				\left( \prod_t P(\epsilon_{nkt}|\alpha^\theta,\sigma^\theta,z_{nk}) \right) 
 				P(s_{nk}|\pi_k^s,z_{nk})
 				P(\theta_{nk}|\alpha^\theta, \sigma^\theta, z_{nk})
 				P(\Lambda_{k})
@@ -154,30 +153,20 @@ The joint distribution of the data and parameters satisfies the conditional inde
 		P(\alpha^\theta)
 		P(\sigma^\theta),
 \end{align}
-where line (\ref{eq:likelihood}) is the likelihood, line (\ref{eq:prior}) is the prior and line (\ref{eq:hprior}) is the hyper prior.
+where line (\ref{eq:likelihood}) is the likelihood, line (\ref{eq:prior}) is the prior and line (\ref{eq:hprior}) is the hyper prior. The various distributions are described in the following sections.
+
+?????????????????????Define Z
 
 \subsection{Features allocation}
 
-Our first object of interest is the binary matrix of features allocation $Z=\{z_{nk}\}$ where each row represents an individual and each column represents a feature. While the $Z$ matrix has an infinite number of columns, we are only interested in the columns where there is at least a $1$ for our sample. We use the infinite feature model defined by \cite{griffiths2011indian} in their paper about the Indian Buffet Process (IBP). The IBP approach presents a convenient way to perform inference by simulation for models using latent features. Using this model, we assume that the probability that any individual possesses feature $k$ is $\pi_k^z$ and that the features are generated independently. The distribution of the infinite matrix $Z$ can be obtained by starting with a finite $N \times K$ matrix of features allocation $Z_K$ and taking the limit when $K \to \infty$.
+Our first object of interest is the binary matrix of features allocation $Z=\{z_{nk}\}$ where each row represents an individual and each column represents a feature. While the $Z$ matrix has an infinite number of columns, we are only interested in the columns where there is at least a $1$ in our sample. We use the two-parameter infinite feature model defined by \cite{griffiths2011indian} in their paper about the Indian Buffet Process (IBP). The IBP approach presents a convenient way to perform inference by simulation for models using latent features. We use the two-parameter exchangeable Indian Buffet Process as a prior for our binary Matrix $Z$:
 
-In the finite case, the probability of $Z_K$ given $\pi^z=\{\pi_1^z,\ldots,\pi_K^z\}$ is:
-$$ P(Z_K|\pi) = \prod_{k=1}^{K} \prod_{n=1}^{N} P(z_{nk}|\pi_k^z)  = \prod_{k=1}^{K} (\pi_k^z)^{m_k} (1-\pi_k^z)^{N-m_k}$$ 
-where $m_k=\sum_{n=1}^{N} z_{nk}$ is the number of individuals having feature $k$.
-We can then define a prior on $\pi^z$ using a $Beta$ distribution:
-$$\pi_k^z \sim Beta(\frac{\alpha^z \beta^z}{K},\beta^z)$$
+$$ Z \sim eIBP(\alpha^z,\beta^z) $$ 
 
-In order to take the limit as $K \to \infty$, we need to define a distribution over classes of equivalent matrices. Matrices are defined as equivalent if one can be obtained from the other by permutation of the columns. A class of equivalent matrices is denoted $[Z]$. In order to be able to compare matrices, we use permutations on their column in order to put them in left ordered form. \cite{griffiths2011indian} define the left-ordered form as follow: "$lof(Z)$ is obtained by ordering
-the columns of the binary matrix $Z$ from left to right by the magnitude of the binary number
-expressed by that column, taking the first row as the most significant bit". Two equivalent matrices have the same left-ordered form. Taking left-ordered forms let us define a distribution over equivalent classes of matrices. Matrices with left-ordered forms following that distribution can be generated using the IBP.
 
-Using this process, the average number of feature per individual will be $\alpha^z$. The $\beta^z$ parameter lets us set the average overall number of features observed in a sample. The expected overall number of features present in a sample will be $\alpha^z \sum_{n=1}^{N} \frac{\beta^z}{\beta^z + n - 1}$. Depending on $\beta$, this number can range from $\alpha^z$ where everybody share the same features, to $N\alpha^z$ where no features are shared.
 
-Here are three matrices produced using the described process using various parameter values:
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.5]{img/IBP2params.png}
-	\caption{Three matrices produced with the IBP.\citep{griffiths2011indian}}
-\end{figure}
+Using this process, the average number of feature per individual will be $\alpha^z$. The $\beta^z$ parameter lets us set the average overall number of features observed in a sample. The expected overall number of features present in a sample will be $\alpha^z \sum_{n=1}^{N} \frac{\beta^z}{\beta^z + n - 1}$. Depending on $\beta^z$, this number can range from $\alpha^z$ where everybody shares the same features, to $N\alpha^z$ where no features are shared.
+
 
 \subsection{Attributes with monotone preferences and $\Lambda_k$} \label{sec:lambda}
 
