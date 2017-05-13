@@ -111,7 +111,7 @@ where $z_{nk}$ is a binary variable indicating whether individual $n$ possesses 
 $$ \psi_n = \left\{ z_{nk}, s_{nk},\theta_{nk}, \{\epsilon_{nkt}\}_{t=1}^T , \Lambda_{k} \right\}_{k=1}^{K_+} .$$
 
 It is possible that we want to restrict preferences such that they only increase in some attributes.
-For such attribute, the active levels are restricted to be of the form $\{l,l+1,\ldots,L\}$ if the the class $\Lambda_k$ is associated with a positive value ($s_{nk}=0$), and of the form $\{1,\ldots,l-1,l\}$ if the class is associated with a negative value ($s_{nk}=1$). We denote the first case as a upper active levels, and the second as lower active levels. If a class $\Lambda_k$ has at least one active monotone attribute, we call it a monotone class.
+For such attribute, the active levels are restricted to be of the form $\{l,l+1,\ldots,L\}$ if the the class $\Lambda_k$ is associated with a positive value ($s_{nk}=0$), and of the form $\{1,\ldots,l-1,l\}$ if the class is associated with a negative value ($s_{nk}=1$). We denote the first case as a upper active levels, and the second as lower active levels. If a class $\Lambda_k$ has at least one active monotone attribute, we call it a monotone class and denote it with the binary variable $m_k=1$.
 Note that if several monotone attributes are active in the class, they should all be of the same type. If all the active monotone attribute are of the upper active levels type, we say that the class has a positive polarity and denote it $\rho_k=0$. conversely, if the monotone attributes are of the lower active levels type, we say that the class has a negative polarity and denote it $\rho_k=1$.
 
 
@@ -136,11 +136,11 @@ $$ \left\{  \{\pi_k^s\}_{k=1}^{K_+}, \alpha^\theta, \sigma^\theta  \right\} $$
 
 The joint distribution of the data and parameters satisfies the conditional independence relationships implied by the following decomposition:
 \begin{align}
-		& P\left( \{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^N, \left\{ \{\{\epsilon_{nkt}\}_{t=1}^T, z_{nk},s_{nk}, \theta_{nk} \}_{n=1}^N, \Lambda_{k},\pi_k^z, \pi_k^s \right\}_{k=1}^{K_+},\alpha^\theta, \sigma^\theta \right) \\
+		& P\left( \{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^N, \left\{ \{\{\epsilon_{nkt}\}_{t=1}^T, z_{nk},s_{nk}, \theta_{nk} \}_{n=1}^N, \Lambda_{k}, \pi_k^s \right\}_{k=1}^{K_+},\alpha^\theta, \sigma^\theta \right) \\
 	=	& \label{eq:likelihood} \prod_t \prod_{n} P\left(x_{nt}^*|\{\epsilon_{nkt},z_{nk},s_{nk}, \theta_{nk},\Lambda_{k}  \}_{k=1}^{K_+}\right) \\
-		& \label{eq:prior} \times \prod_k \left[
+		& \label{eq:prior} \times P(Z) \prod_k 
+		\left[
 			\prod_n 
-				P(Z)
 				\left( \prod_t P(\epsilon_{nkt}|\alpha^\theta,\sigma^\theta,z_{nk}) \right) 
 				P(s_{nk}|\pi_k^s,z_{nk})
 				P(\theta_{nk}|\alpha^\theta, \sigma^\theta, z_{nk})
@@ -153,17 +153,13 @@ The joint distribution of the data and parameters satisfies the conditional inde
 		P(\alpha^\theta)
 		P(\sigma^\theta),
 \end{align}
-where line (\ref{eq:likelihood}) is the likelihood, line (\ref{eq:prior}) is the prior and line (\ref{eq:hprior}) is the hyper prior. The various distributions are described in the following sections.
-
-?????????????????????Define Z
+with $Z=\{z_{nk}\}$ being the binary matrix of features allocation where each row represents an individual and each column represents a feature. In this equation, line (\ref{eq:likelihood}) is the likelihood, line (\ref{eq:prior}) is the prior and line (\ref{eq:hprior}) is the hyper-prior. The various distributions are described in the following sections.
 
 \subsection{Features allocation}
 
-Our first object of interest is the binary matrix of features allocation $Z=\{z_{nk}\}$ where each row represents an individual and each column represents a feature. While the $Z$ matrix has an infinite number of columns, we are only interested in the columns where there is at least a $1$ in our sample. We use the two-parameter infinite feature model defined by \cite{griffiths2011indian} in their paper about the Indian Buffet Process (IBP). The IBP approach presents a convenient way to perform inference by simulation for models using latent features. We use the two-parameter exchangeable Indian Buffet Process as a prior for our binary Matrix $Z$:
+Our first object of interest is the binary matrix of features allocation $Z=\{z_{nk}\}$. While the $Z$ matrix has an infinite number of columns, we are only interested in the features (columns) that at least one person in our sample possesses. We use the two-parameter infinite feature model defined by \cite{griffiths2011indian} in their paper about the Indian Buffet Process (IBP). The IBP approach presents a convenient way to perform inference by simulation for models using latent features. We use the two-parameter exchangeable Indian Buffet Process as a prior for our binary Matrix $Z$:
 
 $$ Z \sim eIBP(\alpha^z,\beta^z) $$ 
-
-
 
 Using this process, the average number of feature per individual will be $\alpha^z$. The $\beta^z$ parameter lets us set the average overall number of features observed in a sample. The expected overall number of features present in a sample will be $\alpha^z \sum_{n=1}^{N} \frac{\beta^z}{\beta^z + n - 1}$. Depending on $\beta^z$, this number can range from $\alpha^z$ where everybody shares the same features, to $N\alpha^z$ where no features are shared.
 
@@ -187,7 +183,7 @@ The corresponding distributions are detailed below:
 	$$ P(C_k|c_k) = \binom{L}{c_k}^{-1}$$ 
 	\item The probability of observing the set of active levels $\Lambda_{ki}$ depends on several factors:
 	\begin{itemize}
-		\item If $\Lambda_{ki}$ is monotone:
+		\item If $\Lambda_{ki}$ is monotone ($m_k=1$):
 		$$P(\Lambda_{ki}|\rho_k) =  
 			\begin{cases}
 				1/L_i,& \text{if } \Lambda_{ki} \text{ has upper active levels and } \rho_k = 0\\
@@ -195,7 +191,7 @@ The corresponding distributions are detailed below:
 				0,              & \text{otherwise}
 			\end{cases}
 		$$
-		\item If $\Lambda_{ki}$ is not monotone, it does not depend on the polarity $\rho_k$. The number of active levels $\lambda_{ki}$ is uniformly distributed on $\{1,...,L_i\}$ and each level has an equal probability of being active.
+		\item If $\Lambda_{ki}$ is not monotone ($m_k=0$), it does not depend on the polarity $\rho_k$. The number of active levels $\lambda_{ki}$ is uniformly distributed on $\{1,...,L_i\}$ and each level has an equal probability of being active.
 		\begin{align*}
 			P(\Lambda_{ki}|\rho_k) & = P(\Lambda_{ki}|\lambda_{ki})\cdot P(\lambda_{ki}) \\
 				& = \binom{L_i}{\lambda_{ki}}^{-1} \cdot \frac{1}{\lambda_{ki}}
@@ -227,7 +223,7 @@ $$ \pi_k^s \sim Beta(1,1) $$
 \section{Inference}
 
 \subsection{Likelihood and Posetrior} \label{sec:likelihood}
-Conditional on the set of parameters $\psi$, there is no random term in the utility function. The likelihood becomes a degenerate function that is equal to $1$ if all the observed choices are predicted correctly and $0$ otherwise. The probability of observing the set of choices $\{x_{nt}^*\}$ is: 
+Conditional on the set of all parameters, denoted $\psi$, there is no random term in the utility function. The likelihood becomes a degenerate function that is equal to $1$ if all the observed choices are predicted correctly and $0$ otherwise. The probability of observing the set of choices $\{x_{nt}^*\}$ is: 
 $$P(\{x_{nt}^*\}|\psi) = \mathds{1}\{ \arg \max\limits_{x\in X_{nt}} u(x,\psi) = x_{nt}^*, \forall n,t \}$$
 
 Likelihood-based inference consists in recovering the identified set of parameters such that: $$P(\{x_{nt}^*\}|\psi) = 1 $$
@@ -248,12 +244,14 @@ $$ Q(\psi|\{x_{nt}^*\};\eta,\tau,\zeta) \propto Q(\{x_{nt}^*\}|\psi;\eta,\tau,\z
 
 Using these tempering approaches, we can define a sequence of distributions by specifying the values $(\eta,\tau,\zeta)$ for each distribution in the sequence. We start by the distribution 
 $$Q(\psi|\{x_{nt}^*\};\eta=1,\tau=1,\zeta=2) \propto 2^{ u(x_{1,1}^*,\psi) - \max_{x \in X_{1,1}} u(x,\psi)} \cdot P(\psi)$$ 
-and progressively increase $\zeta$ in each subsequent distribution until $\zeta \to \infty$ and the target distribution becomes
+and progressively increase $\zeta$ by multiplying it by $2$ in each subsequent distribution until $\zeta \to \infty$ and the target distribution becomes
 $$ Q(\psi|\{x_{nt}^*\};\eta=1,\tau=1,\zeta \to \infty) \propto  P(\psi|\{x_{1,1}^*\}).$$
+The initial distributions in our sequence follow the following pattern for the values of $(\eta,\tau,\zeta)$:
+$$(1,1,2),(1,1,4),(1,1,8),...,(1,1,\infty) $$
 
-We then alternatively increase the value of $\tau$ by $1$ and progressively increase $\zeta$ from $2$ to $\infty$ until we reach the last observation $T$ for the current individual. For our application, we choose to increase $\zeta$ by a factor of $2$ with each step in the sequence. We then increase $\eta$ by one and start again alternatively increasing the value of $\tau$ by $1$ and progressively increasing $\zeta$ from $2$ to $\infty$ until we reach the last observation of the last individual $N$.
+We then increase the value of $\tau$ by $1$ and progressively increase $\zeta$ from $(1,2,2)$ to $(1,2,\infty)$. We repeat this step with until we reach the last observation for the current individual $(1,T,\infty)$. We then increase $\eta$ by one and start again alternatively increasing the value of $\tau$ by $1$ and progressively increasing $\zeta$ from $(2,1,2)$ to $(2,1,\infty)$. We repeat this process until we reach the last observation of the last individual $(N,T,\infty)$, where $Q(\psi|\{x_{nt}^*\};\eta=N,\tau=T,\zeta=\infty)$ is equal to the full likelihood.
 
-The ratio of two consecutive target distributions when increasing $\zeta$ by a factor of $a$ is equal to
+Note that the ratio of two consecutive target distributions when increasing $\zeta$ by a factor of $a$ is equal to
 $$ \frac{P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot (a \zeta)^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}}{P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot \zeta^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}} = a^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}.$$
 
 The ratio of two consecutive target distributions when increasing $\tau$ by $1$ and reseting $\zeta$ to $2$ is equal to:
