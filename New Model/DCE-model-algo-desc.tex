@@ -249,7 +249,7 @@ $$ Q(\psi|\{x_{nt}^*\};\eta=1,\tau=1,\zeta \to \infty) \propto  P(\psi|\{x_{1,1}
 The initial distributions in our sequence follow the following pattern for the values of $(\eta,\tau,\zeta)$:
 $$(1,1,2),(1,1,4),(1,1,8),...,(1,1,\infty) $$
 
-We then increase the value of $\tau$ by $1$ and progressively increase $\zeta$ from $(1,2,2)$ to $(1,2,\infty)$. We repeat this step with until we reach the last observation for the current individual $(1,T,\infty)$. We then increase $\eta$ by one and start again alternatively increasing the value of $\tau$ by $1$ and progressively increasing $\zeta$ from $(2,1,2)$ to $(2,1,\infty)$. We repeat this process until we reach the last observation of the last individual $(N,T,\infty)$, where $Q(\psi|\{x_{nt}^*\};\eta=N,\tau=T,\zeta=\infty)$ is equal to the full likelihood.
+We then increase the value of $\tau$ by $1$ and progressively increase $\zeta$ from $(1,2,2)$ to $(1,2,\infty)$. We repeat this step with until we reach the last observation for the current individual $(1,T,\infty)$. We then increase $\eta$ by one and start again alternatively increasing the value of $\tau$ by $1$ and progressively increasing $\zeta$ from $(2,1,2)$ to $(2,1,\infty)$. We repeat this process until we reach the last observation of the last individual $(N,T,\infty)$, where $Q(\psi|\{x_{nt}^*\};\eta=N,\tau=T,\zeta=\infty)$ is equal to the posterior using the full likelihood.
 
 Note that the ratio of two consecutive target distributions when increasing $\zeta$ by a factor of $a$ is equal to
 $$ \frac{P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot (a \zeta)^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}}{P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot \zeta^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}} = a^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}.$$
@@ -259,29 +259,48 @@ $$ \frac{  P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}
 
 \subsection{Quasi-Posterior Simulation}
 
-We propose the adaptive Sequential Monte Carlo (SMC) approach \citep{DurhamGeweke2013} as a posterior simulation strategy, for two main reasons.
+We propose the adaptive Sequential Monte Carlo (SMC) approach \citep{DurhamGeweke2014adaptive} as a posterior simulation strategy, for two main reasons.
 First, many utility functions of the form in \eqref{e:uff} give identical predictions.
 We cannot expect these functions to be close, in the sense of a practical MCMC chain passing from one to the other in a small number of steps with reasonable probability. Having many particles exploring the parameter space solves that problem.
 Second, a sequential inference method is required for our tempering approach.
 
-The sequence of target distributions is obtained by setting $\zeta=2$ for the first distribution, and by increasing $\zeta$ by a factor of $2$ at each iteration:
-$$ Q(\psi|\{x_{nt}^*\},\zeta), \; \text{ for } \zeta=2,4,8,\ldots $$ 
-
 
 \subsubsection{Algorithm}
 
-The algorithm uses a population of $J$ groups of $P$ particles, each of them containing a set of realizations of all our parameters and some simulated hyperparameters that do not have a closed form posterior: $$\psi_{jp} = \left\{\alpha^\theta, \sigma^\theta, K_+,\left\{\Lambda_k, \pi^z_k, \{z_{nk},s_{nk},\theta_{nk},\{\epsilon_{nkt}\}_{t=1}^T \}_{n=1}^N \right\}_{k=1}^{K_+} \right\}.$$
+The algorithm uses a population of $J$ groups of $P$ particles, each of them containing a set of realizations of all our parameters: $$\psi^{(jp)} = \left\{ \left\{ \{\{\epsilon_{nkt}^{(jp)}\}_{t=1}^T, z_{nk}^{(jp)},s_{nk}^{(jp)}, \theta_{nk}^{(jp)} \}_{n=1}^N, \Lambda_{k}^{(jp)}, {\pi_k^s}^{(jp)} \right\}_{k=1}^{K_+},{\alpha^\theta}^{(jp)}, {\sigma^\theta}^{(jp)} \right\}.$$
 
-The algorithm starts with an Initialization $(I)$ phase and then iterates over Correction $(C)$, Selection $(S)$ and Mutation $(M)$ phases. 
+The algorithm starts with an Initialization $(I)$ phase and then iterates over Correction $(C)$, Selection $(S)$ and Mutation $(M)$ phases until the last distribution in the sequence is reached. 
 
-The first group of particles will be used to determine when to move from the C phase to the S phase based on Effective Sample Size (ESS). The ESS for the first group of particles will be denoted $ESS_1$. The simulated values of our first group of particles will be discarded in our analysis of the simulated posterior.  
+The I phase draws the $J\times P$ particles from the prior.
 
-The general structure of the algorithm is as follow:
+The C phase assigns a weight to particles following an importance sampling approach. The particles are distributed proportionally to an original quasi-posterior $Q(\psi|\{x_{nt}^*\};\eta_o,\tau_o,\zeta_o)$, and we want to approximate the distribution coming further in the sequence $Q(\psi|\{x_{nt}^*\}; \eta_f,\tau_f,\zeta_f)$. In this context, importance sampling relies on weighting each particles according to the following function:
+$$ w^{(j,p)} = \frac{Q(\psi|\{x_{nt}^*\};\eta_f,\tau_f,\zeta_f)}{Q(\psi|\{x_{nt}^*\};\eta_o,\tau_o,\zeta_o)}.$$
 
+The transition from the C phase to the S phase is done adaptively as a function of particles' Relative Sample Size (RSS). The RSS is computed by dividing the Effective Sample Size (ESS) by the total number of particles:
+$$ RSS(\{ w^{(j,p)}\}) = \frac{[\sum_j \sum_p  w^{(j,p)} ]^2}{ J \cdot P \cdot \sum_j \sum_p  {w^{(j,p)}}^2 } $$
 
+We want to find the position $(\eta_f,\tau_f,\zeta_f)$ in the sequence such that the RSS is below $0.5$, but above $0.2$. We propose here a strategy to find $(\eta_f,\tau_f,\zeta_f)$ satisfying this condition without having to compute the weights for every distribution in the sequence.
+
+Starting with the distribution at $(\eta_o,\tau_o,\zeta_o)$, we compute the weights and RSS for a subsequent distribution at $(\eta_s,\tau_s,\infty)$. If the RSS is above $0.5$ we directly move to the next distribution having $\zeta=\infty$. In other words, we add an observation $x_{nt}$ while maintaining $\zeta=\infty$. We repeat this process by adding observations until the RSS falls below $0.5$. At this point we have reached the distribution $(\eta_f,\tau_f,\infty)$. If the RSS is above $0.2$, we directly move to the S phase. If the RSS is below $0.2$ we compute the weights and RSS for each distribution in the sequence starting at $(\eta_f,\tau_f,2)$. Once we find a value $\zeta^*$ for which the RSS is below $0.5$, we set $\zeta_f=\zeta^*$ if $RSS > 0.2$, and $\zeta_f=\zeta^*/2$ otherwise. Note that in the special case where $\zeta_f=1$, the distribution $(\eta_f,\tau_f,1)$ is in fact the same as the distribution preceding $(\eta_f,\tau_f,2)$ where $\zeta=\infty$ (with one less observation).
+
+The S phase resamples $P$ new particles within each group $j$, using a multinomial resampling scheme with weights proportional to $\{ w^{(j,p)}\}$. The weights need to be normalized within each group $j$ such that:
+$$ \sum_p  w^{(j,p)} = 1 $$ 
+????????????????? Note: should we use residual/stratified/systematic resampling instead ??????????????
+
+The M phase applies a series of Markov Chain Monte-Carlo (MCMC) steps to each particle such that the current distribution $Q(\psi|\{x_{nt}^*\};\eta_f,\tau_f,\zeta_f)$ is the stationary distribution of the chain. The M step is detailed in the following section.
+
+\subsubsection{M phase}
+
+In this phase, 20 MCMC steps are applied to each particles. Each step consists in an application of the Metropolis-Hastings within Gibbs approach. The parameter space being of high dimension, partition the dimensions into subspaces called Gibbs blocks. We then apply a Metropolis-Hastings step withing each block. 
+
+\textbf{-----------------------------------------------------------------------------------------------}
+
+\textbf{?????????---IGNORE EVERYTHING BELOW THIS LINE---?????????}
+
+\textbf{-----------------------------------------------------------------------------------------------}
 \begin{itemize}
-	\item Initialization phase: Initialize $J \times P$ particles $\{\{\psi_{jp}\}_{p=1}^P\}_{j=1}^J$
-	\item For $\eta=1$ to $N$ {\it (Iterate over individuals)}
+	\item Initialization phase: Initialize $J \times P$ particles $\{\{\psi_{jp}\}_{p=1}^P\}_{j=1}^J$ by drawing from the prior
+	\item Repeat until 
 	\begin{itemize}
 		\item Draw $\{z_{\eta k},s_{\eta k},\theta_{\eta k}\}$ for the newly added individual (\textit{see section \ref{sec:drawparams}})
 		\item For $\tau=1$ to $T$ {\it (Iterate over observations for each individual)}
