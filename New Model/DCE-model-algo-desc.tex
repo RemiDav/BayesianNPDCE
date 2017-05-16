@@ -224,7 +224,7 @@ $$ \pi_k^s \sim Beta(1,1) $$
 
 \subsection{Likelihood and Posetrior} \label{sec:likelihood}
 Conditional on the set of all parameters, denoted $\psi$, there is no random term in the utility function. The likelihood becomes a degenerate function that is equal to $1$ if all the observed choices are predicted correctly and $0$ otherwise. The probability of observing the set of choices $X^* = \{x_{nt}^*\}_{n,t}$ is: 
-$$P(X^*|\psi) = \mathds{1}\{ \arg \max\limits_{x\in X_{nt}} u(x,\psi) = x_{nt}^*, \forall n,t \}$$
+$$P(X^*|\psi) = \mathds{1}\{ \arg \max\limits_{x\in X_{nt}} u_t(x,\psi_n) = x_{nt}^*, \forall n,t \}$$
 
 Likelihood-based inference consists in recovering the identified set of parameters such that: $$P(X^*|\psi) = 1 $$
 We can see that with the current likelihood function, if at least one choice is not maximizing utility according to the current value of $\psi$, the likelihood takes the value of $0$.
@@ -236,14 +236,14 @@ where $P(\psi)$ denotes the prior density of our parameters.
 \subsection{Tempering and Sequence of Distributions} 
 
 Simulating the posterior can be quite difficult, and we simulate instead a sequence of target distributions converging to this Posterior. The functions used in the sequence are increasingly difficult to simulate. This process is known as tempering, and we achieve it by combining two methods. First, we use Data Tempering and introduce the observations one by one in the likelihood. We start with the first observation of the first individual $x_{1,1}^*$, then add the subsequent observations for this individual until all the observations are included in the likelihood. We then add the observations of the following individual, and continue until every observation of every individual are included. For the second tempering approach, we use an instrumental function that does not take a value of zero if the last observed choice is not utility maximizing with the current value of $\psi$. We call this approach $\zeta$-tempering and substitute the likelihood with the following function:  
-$$Q(X^*|\psi;\eta,\tau,\zeta) = P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot \zeta^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)},$$
+$$Q(X^*|\psi;\eta,\tau,\zeta) = P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot \zeta^{ u_\tau(x_{\eta \tau}^*,\psi_\eta) - \max_{x \in X_{\eta \tau}} u_\tau(x,\psi_\eta)},$$
 where $\zeta>1$ is a constant chosen by the researcher. We can see that this instrumental function is the product of $3$ terms. The first one is the likelihood of observing the choices of individuals $1$ to $\eta-1$. The second is the likelihood of observing the $\tau-1$ first choices of individual $\eta$. The last term requires further attention. If the last observed choice is utility maximizing, this term is equal to $1$ as for the likelihood. However, it is equal to a value between $0$ and $1$ if another choice would be utility maximizing. The smaller the difference between the observed choice and the utility maximizing one, the closer the term gets to $1$. It is important to note that $Q(X^*|\psi;\eta,\tau,\zeta) \to P(\{x_{\eta t}^*\}_{t=1}^\tau \cup \{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi)$ as $\zeta \to \infty$. 
 
 The corresponding quasi-posterior distribution is defined as
 $$ Q(\psi|X^*;\eta,\tau,\zeta) \propto Q(X^*|\psi;\eta,\tau,\zeta) \cdot P(\psi) .$$
 
 Using these tempering approaches, we can define a sequence of distributions by specifying the values $(\eta,\tau,\zeta)$ for each distribution in the sequence. We start by the distribution 
-$$Q(\psi|X^*;\eta=1,\tau=1,\zeta=2) \propto 2^{ u(x_{1,1}^*,\psi) - \max_{x \in X_{1,1}} u(x,\psi)} \cdot P(\psi)$$ 
+$$Q(\psi|X^*;\eta=1,\tau=1,\zeta=2) \propto 2^{ u_\tau(x_{1,1}^*,\psi_\eta) - \max_{x \in X_{1,1}} u_tau(x,\psi_\eta)} \cdot P(\psi)$$ 
 and progressively increase $\zeta$ by multiplying it by $2$ in each subsequent distribution until $\zeta \to \infty$ and the target distribution becomes
 $$ Q(\psi|X^*;\eta=1,\tau=1,\zeta \to \infty) \propto  P(\psi|\{x_{1,1}^*\}).$$
 The initial distributions in our sequence follow the following pattern for the values of $(\eta,\tau,\zeta)$:
@@ -251,11 +251,6 @@ $$(1,1,2),(1,1,4),(1,1,8),...,(1,1,\infty) $$
 
 We then increase the value of $\tau$ by $1$ and progressively increase $\zeta$ from $(1,2,2)$ to $(1,2,\infty)$. We repeat this step with until we reach the last observation for the current individual $(1,T,\infty)$. We then increase $\eta$ by one and start again alternatively increasing the value of $\tau$ by $1$ and progressively increasing $\zeta$ from $(2,1,2)$ to $(2,1,\infty)$. We repeat this process until we reach the last observation of the last individual $(N,T,\infty)$, where $Q(\psi|X^*;\eta=N,\tau=T,\zeta=\infty)$ is equal to the posterior using the full likelihood.
 
-Note that the ratio of two consecutive target distributions when increasing $\zeta$ by a factor of $a$ is equal to
-$$ \frac{P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot (a \zeta)^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}}{P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot \zeta^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}} = a^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}.$$
-
-The ratio of two consecutive target distributions when increasing $\tau$ by $1$ and reseting $\zeta$ to $2$ is equal to:
-$$ \frac{  P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot 2^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}}{P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi)} = 2^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)} $$
 
 \subsection{Quasi-Posterior Simulation}
 
