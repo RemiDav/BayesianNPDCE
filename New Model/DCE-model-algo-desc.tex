@@ -203,8 +203,8 @@ The corresponding distributions are detailed below:
 
 The other parameters $(s_{nk},\theta_{nk},\epsilon_{nkt})$ are defined conditional on $z_{nk}$. When $z_{nk}=0$, the values of all these parameters are arbitrarily set to $0$. We have to define the prior distributions of $(s_{nk},\theta_{nk},\epsilon_{nkt})$ conditional on $z_{nk}=1$:
 $$ s_{nk}|\pi_k^s,z_{ik}=1 \sim \left\{ \begin{array}{cl}
-0 & if \; m_k=1 \text{ and } \rho_k=1\\
-1 & if \; m_k=1 \text{ and } \rho_k=0\\
+0 & if \; m_k=1 \text{ and } \rho_k=0\\
+1 & if \; m_k=1 \text{ and } \rho_k=1\\
 Bernoulli(\pi_k^s) & \text{otherwise}\\
 \end{array}\right.$$
 $$ \theta_{nk}|\sigma^\theta,\alpha_\theta,z_{ik}=1 \sim Gamma(\sigma^\theta \alpha^\theta,1) $$
@@ -223,33 +223,33 @@ $$ \pi_k^s \sim Beta(1,1) $$
 \section{Inference}
 
 \subsection{Likelihood and Posetrior} \label{sec:likelihood}
-Conditional on the set of all parameters, denoted $\psi$, there is no random term in the utility function. The likelihood becomes a degenerate function that is equal to $1$ if all the observed choices are predicted correctly and $0$ otherwise. The probability of observing the set of choices $\{x_{nt}^*\}$ is: 
-$$P(\{x_{nt}^*\}|\psi) = \mathds{1}\{ \arg \max\limits_{x\in X_{nt}} u(x,\psi) = x_{nt}^*, \forall n,t \}$$
+Conditional on the set of all parameters, denoted $\psi$, there is no random term in the utility function. The likelihood becomes a degenerate function that is equal to $1$ if all the observed choices are predicted correctly and $0$ otherwise. The probability of observing the set of choices $X^* = \{x_{nt}^*\}_{n,t}$ is: 
+$$P(X^*|\psi) = \mathds{1}\{ \arg \max\limits_{x\in X_{nt}} u(x,\psi) = x_{nt}^*, \forall n,t \}$$
 
-Likelihood-based inference consists in recovering the identified set of parameters such that: $$P(\{x_{nt}^*\}|\psi) = 1 $$
+Likelihood-based inference consists in recovering the identified set of parameters such that: $$P(X^*|\psi) = 1 $$
 We can see that with the current likelihood function, if at least one choice is not maximizing utility according to the current value of $\psi$, the likelihood takes the value of $0$.
 
 In the Bayesian framework, the target distribution is the corresponding posterior:
-$$  P(\psi|\{x_{nt}^*\}) \propto P(\{x_{nt}^*\}|\psi) \cdot P(\psi),$$
+$$  P(\psi|X^*) \propto P(X^*|\psi) \cdot P(\psi),$$
 where $P(\psi)$ denotes the prior density of our parameters.
 
 \subsection{Tempering and Sequence of Distributions} 
 
 Simulating the posterior can be quite difficult, and we simulate instead a sequence of target distributions converging to this Posterior. The functions used in the sequence are increasingly difficult to simulate. This process is known as tempering, and we achieve it by combining two methods. First, we use Data Tempering and introduce the observations one by one in the likelihood. We start with the first observation of the first individual $x_{1,1}^*$, then add the subsequent observations for this individual until all the observations are included in the likelihood. We then add the observations of the following individual, and continue until every observation of every individual are included. For the second tempering approach, we use an instrumental function that does not take a value of zero if the last observed choice is not utility maximizing with the current value of $\psi$. We call this approach $\zeta$-tempering and substitute the likelihood with the following function:  
-$$Q(\{x_{nt}^*\}|\psi;\eta,\tau,\zeta) = P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot \zeta^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)},$$
-where $\zeta>1$ is a constant chosen by the researcher. We can see that this instrumental function is the product of $3$ terms. The first one is the likelihood of observing the choices of individuals $1$ to $\eta-1$. The second is the likelihood of observing the $\tau-1$ first choices of individual $\eta$. The last term requires further attention. If the last observed choice is utility maximizing, this term is equal to $1$ as for the likelihood. However, it is equal to a value between $0$ and $1$ if another choice would be utility maximizing. The smaller the difference between the observed choice and the utility maximizing one, the closer the term gets to $1$. It is important to note that $Q(\{x_{nt}^*\}|\psi;\eta,\tau,\zeta) \to P(\{x_{\eta t}^*\}_{t=1}^\tau \cup \{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi)$ as $\zeta \to \infty$. 
+$$Q(X^*|\psi;\eta,\tau,\zeta) = P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot \zeta^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)},$$
+where $\zeta>1$ is a constant chosen by the researcher. We can see that this instrumental function is the product of $3$ terms. The first one is the likelihood of observing the choices of individuals $1$ to $\eta-1$. The second is the likelihood of observing the $\tau-1$ first choices of individual $\eta$. The last term requires further attention. If the last observed choice is utility maximizing, this term is equal to $1$ as for the likelihood. However, it is equal to a value between $0$ and $1$ if another choice would be utility maximizing. The smaller the difference between the observed choice and the utility maximizing one, the closer the term gets to $1$. It is important to note that $Q(X^*|\psi;\eta,\tau,\zeta) \to P(\{x_{\eta t}^*\}_{t=1}^\tau \cup \{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi)$ as $\zeta \to \infty$. 
 
 The corresponding quasi-posterior distribution is defined as
-$$ Q(\psi|\{x_{nt}^*\};\eta,\tau,\zeta) \propto Q(\{x_{nt}^*\}|\psi;\eta,\tau,\zeta) \cdot P(\psi) .$$
+$$ Q(\psi|X^*;\eta,\tau,\zeta) \propto Q(X^*|\psi;\eta,\tau,\zeta) \cdot P(\psi) .$$
 
 Using these tempering approaches, we can define a sequence of distributions by specifying the values $(\eta,\tau,\zeta)$ for each distribution in the sequence. We start by the distribution 
-$$Q(\psi|\{x_{nt}^*\};\eta=1,\tau=1,\zeta=2) \propto 2^{ u(x_{1,1}^*,\psi) - \max_{x \in X_{1,1}} u(x,\psi)} \cdot P(\psi)$$ 
+$$Q(\psi|X^*;\eta=1,\tau=1,\zeta=2) \propto 2^{ u(x_{1,1}^*,\psi) - \max_{x \in X_{1,1}} u(x,\psi)} \cdot P(\psi)$$ 
 and progressively increase $\zeta$ by multiplying it by $2$ in each subsequent distribution until $\zeta \to \infty$ and the target distribution becomes
-$$ Q(\psi|\{x_{nt}^*\};\eta=1,\tau=1,\zeta \to \infty) \propto  P(\psi|\{x_{1,1}^*\}).$$
+$$ Q(\psi|X^*;\eta=1,\tau=1,\zeta \to \infty) \propto  P(\psi|\{x_{1,1}^*\}).$$
 The initial distributions in our sequence follow the following pattern for the values of $(\eta,\tau,\zeta)$:
 $$(1,1,2),(1,1,4),(1,1,8),...,(1,1,\infty) $$
 
-We then increase the value of $\tau$ by $1$ and progressively increase $\zeta$ from $(1,2,2)$ to $(1,2,\infty)$. We repeat this step with until we reach the last observation for the current individual $(1,T,\infty)$. We then increase $\eta$ by one and start again alternatively increasing the value of $\tau$ by $1$ and progressively increasing $\zeta$ from $(2,1,2)$ to $(2,1,\infty)$. We repeat this process until we reach the last observation of the last individual $(N,T,\infty)$, where $Q(\psi|\{x_{nt}^*\};\eta=N,\tau=T,\zeta=\infty)$ is equal to the posterior using the full likelihood.
+We then increase the value of $\tau$ by $1$ and progressively increase $\zeta$ from $(1,2,2)$ to $(1,2,\infty)$. We repeat this step with until we reach the last observation for the current individual $(1,T,\infty)$. We then increase $\eta$ by one and start again alternatively increasing the value of $\tau$ by $1$ and progressively increasing $\zeta$ from $(2,1,2)$ to $(2,1,\infty)$. We repeat this process until we reach the last observation of the last individual $(N,T,\infty)$, where $Q(\psi|X^*;\eta=N,\tau=T,\zeta=\infty)$ is equal to the posterior using the full likelihood.
 
 Note that the ratio of two consecutive target distributions when increasing $\zeta$ by a factor of $a$ is equal to
 $$ \frac{P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot (a \zeta)^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}}{P(\{\{x_{nt}^*\}_{t=1}^T\}_{n=1}^{\eta-1}|\psi) \cdot  P(\{x_{\eta t}^*\}_{t=1}^{\tau-1}|\psi) \cdot \zeta^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}} = a^{ u(x_{\eta \tau}^*,\psi) - \max_{x \in X_{\eta \tau}} u(x,\psi)}.$$
@@ -267,14 +267,15 @@ Second, a sequential inference method is required for our tempering approach.
 
 \subsubsection{Algorithm}
 
-The algorithm uses a population of $J$ groups of $P$ particles, each of them containing a set of realizations of all our parameters: $$\psi^{(jp)} = \left\{ \left\{ \{\{\epsilon_{nkt}^{(jp)}\}_{t=1}^T, z_{nk}^{(jp)},s_{nk}^{(jp)}, \theta_{nk}^{(jp)} \}_{n=1}^N, \Lambda_{k}^{(jp)}, {\pi_k^s}^{(jp)} \right\}_{k=1}^{K_+},{\alpha^\theta}^{(jp)}, {\sigma^\theta}^{(jp)} \right\}.$$
+The algorithm uses a population of $J$ groups of $P$ particles, each of them containing a set of realizations of all our simulated parameters: $$\psi^{(jp)} = \left\{ \left\{ \{\{\epsilon_{nkt}^{(jp)}\}_{t=1}^T, z_{nk}^{(jp)},s_{nk}^{(jp)}, \theta_{nk}^{(jp)} \}_{n=1}^N, \Lambda_{k}^{(jp)} \right\}_{k=1}^{K_+},{\alpha^\theta}^{(jp)}, {\sigma^\theta}^{(jp)} \right\}.$$
+Note that ${\pi_k^s}$ is not simulated since we can use conjugacy rules between the Binomial and the Beta distributions.
 
 The algorithm starts with an Initialization $(I)$ phase and then iterates over Correction $(C)$, Selection $(S)$ and Mutation $(M)$ phases until the last distribution in the sequence is reached. 
 
 The I phase draws the $J\times P$ particles from the prior.
 
-The C phase assigns a weight to particles following an importance sampling approach. The particles are distributed proportionally to an original quasi-posterior $Q(\psi|\{x_{nt}^*\};\eta_o,\tau_o,\zeta_o)$, and we want to approximate the distribution coming further in the sequence $Q(\psi|\{x_{nt}^*\}; \eta_f,\tau_f,\zeta_f)$. In this context, importance sampling relies on weighting each particles according to the following function:
-$$ w^{(j,p)} = \frac{Q(\psi|\{x_{nt}^*\};\eta_f,\tau_f,\zeta_f)}{Q(\psi|\{x_{nt}^*\};\eta_o,\tau_o,\zeta_o)}.$$
+The C phase assigns a weight to particles following an importance sampling approach. The particles are distributed proportionally to an original quasi-posterior $Q(\psi|X^*;\eta_o,\tau_o,\zeta_o)$, and we want to approximate the distribution coming further in the sequence $Q(\psi|X^*; \eta_f,\tau_f,\zeta_f)$. In this context, importance sampling relies on weighting each particles according to the following function:
+$$ w^{(j,p)} = \frac{Q(\psi|X^*;\eta_f,\tau_f,\zeta_f)}{Q(\psi|X^*;\eta_o,\tau_o,\zeta_o)}.$$
 
 The transition from the C phase to the S phase is done adaptively as a function of particles' Relative Sample Size (RSS). The RSS is computed by dividing the Effective Sample Size (ESS) by the total number of particles:
 $$ RSS(\{ w^{(j,p)}\}) = \frac{[\sum_j \sum_p  w^{(j,p)} ]^2}{ J \cdot P \cdot \sum_j \sum_p  {w^{(j,p)}}^2 } $$
@@ -287,11 +288,154 @@ The S phase resamples $P$ new particles within each group $j$, using a multinomi
 $$ \sum_p  w^{(j,p)} = 1 $$ 
 ????????????????? Note: should we use residual/stratified/systematic resampling instead ??????????????
 
-The M phase applies a series of Markov Chain Monte-Carlo (MCMC) steps to each particle such that the current distribution $Q(\psi|\{x_{nt}^*\};\eta_f,\tau_f,\zeta_f)$ is the stationary distribution of the chain. The M step is detailed in the following section.
+The M phase applies a series of Markov Chain Monte-Carlo (MCMC) steps to each particle such that the current distribution $Q(\psi|X^*;\eta_f,\tau_f,\zeta_f)$ is the stationary distribution of the chain. The M step is detailed in the following section.
 
 \subsubsection{M phase}
 
-In this phase, 20 MCMC steps are applied to each particles. Each step consists in an application of the Metropolis-Hastings within Gibbs approach. The parameter space being of high dimension, partition the dimensions into subspaces called Gibbs blocks. We then apply a Metropolis-Hastings step withing each block. 
+In this phase, 20 MCMC steps are applied to each particles. Each step consists in an application of the Metropolis within Gibbs approach. The parameter space being of high dimension, we partition the parameter dimensions into subspaces called Gibbs blocks. We then apply a MCMC step withing each block such that the target distribution $Q(\psi|X^*;\eta_f,\tau_f,\zeta_f)$ is preserved. In this section, when using the Metropolis-Hastings approach, we denote a proposal by a ${}^*$. The step being done within each particle independently, the index notation ${}^{(jp)}$ is not needed and will be dropped for clarity.
+
+The list of blocks and the MCMC method used is detailed in the following table.
+
+\begin{table}[H]
+	\centering
+	\caption{List of Gibbs blocks}
+	\label{tab:gibbsblocks}
+	\bgroup
+		\def\arraystretch{2}
+		\begin{tabular}{|c|c|l|}
+			\hline
+			Subspace of  & Number of blocks & MCMC strategy \\ \hline
+			$z_{nk}, \;(k \leq K_+)$ & $\eta \times K_+$ & Gibbs \\ \hline
+			$\{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk}, \;(k \leq K_+)$ & $\eta \times K_+$ & Metropolis within Gibbs \\ \hline
+			$\left\{ \{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk},z_{nk} \right\}_{K_+}^{\infty}$  & $\eta$ & Metropolis within Gibbs \footnotemark \\ \hline
+			
+			$\alpha^\theta, \sigma^\theta$ & 1 &  Metropolis within Gibbs \\
+			\hline
+		\end{tabular}
+	\egroup
+\end{table} 
+\footnotetext{$K_+$ may change during the move as new non-zero columns in $Z^{(jp)}$ appear. If new non-zero columns are created, new $\Lambda_{k}^{(jp)}$ will also be drawn.}
+
+We suggest to proceed in the following order. We first resample alternatively $z_{nk}$ and $\left( \{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk} \right)$ starting at $(n=1,k=1)$ and finishing at $(n=1,k=K_+)$. We then sample jointly additional $z_{nk}$ and $\left(\{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk}\right)$ that would create new non-zero columns in $Z$, raising $K_+$. We then move to the next individual and repeat the process until $(n=\eta,k=K_+)$. We finally resample $\left( \alpha^\theta, \sigma^\theta \right) $.
+
+Note that the space of $\Lambda_{k}$ is explored through two machanisms. A class $\Lambda_{k}$ might be deleted during the move in the subspace of $z_{nk}, \;(k \leq K_+)$ if no individual possesses the corresponding feature. New classes $\Lambda_{k}$ might be created during the move in the subspace of $\left\{ \{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk},z_{nk} \right\}_{K_+}^{\infty}$ if a new non-zero column is created in $Z$. More details are given in the following sections.  
+
+\begin{enumerate}
+	\item \textbf{Subspace of $z_{nk}, \;(k \leq K_+)$ }
+	
+	Our goal is to sample from the following conditional distribution: 
+	\begin{align*}
+		&\; Q \left( z_{nk} | X^*; \left\{ \{\epsilon_{nkt}\}_{t=1}^{T_n}, s_{nk}, \theta_{nk}, \Lambda_{k} \right\}_{k=1}^{K_+},\{z_{n'k}\}_{n' \neq n, n'\leq\eta};\eta,\tau,\zeta \right) \\
+		\propto & \; Q(X^*|\psi;\eta,\tau,\zeta) 	P\left(z_{nk}|\{z_{n'k}\}_{n' \neq n, n'\leq\eta}\right) \\
+		\propto  &\; Q \left( \{x_{nt}^*\}_{t=1}^{T_n} | \left\{ \{\epsilon_{nkt}\}_{t=1}^{T_n}, s_{nk}, \theta_{nk}, z_{nk}, \Lambda_{k} \right\}_{k=1}^{K_+};
+		 \eta,\tau,\zeta \right) 
+		P\left(z_{nk}|\{z_{n'k}\}_{n' \neq n, n'\leq\eta}\right),
+	\end{align*}
+	where  $T_n=\tau$ if $n=\eta$, and $T_n=T$ otherwise. The distribution 	$	P\left(z_{nk}|\{z_{n'k}\}_{n' \neq n, n'\leq\eta}\right)$ has a simple closed form \citep{griffiths2011indian}:
+	$$ 	P\left(z_{nk} = 1 |\{z_{n'k}\}_{n' \neq n, n'\leq\eta}\right) = \frac{\sum_{n' \neq n, n'\leq\eta} z_{n'k}}{\beta^z+\eta-1}.$$
+	Note that if $\sum_{n' \neq n, n'\leq\eta} z_{n'k}=0$, the class $k$ is simply deleted and the corresponding $\{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk}$ are set to $0$.
+	
+	We do not need an accept-reject strategy and can resample directly from our target distribution by sampling from a $Bernoulli(\frac{A_1}{A_0+A_1})$ where:
+	$$ A_0 = Q \left( \{x_{nt}^*\}_{t=1}^{T_n} | \left\{ \{\epsilon_{nkt}\}_{t=1}^{T_n}, s_{nk}, \theta_{nk}, \Lambda_{k} \right\}_{k=1}^{K_+},\{z_{n'k}\}_{n' \neq n, n'\leq\eta},z_{nk}=0;
+	\eta,\tau,\zeta \right) 
+	P\left(z_{nk}=0|\{z_{n'k}\}_{n' \neq n, n'\leq\eta}\right)  $$
+	$$ A_1 = Q \left( \{x_{nt}^*\}_{t=1}^{T_n} | \left\{ \{\epsilon_{nkt}\}_{t=1}^{T_n}, s_{nk}, \theta_{nk}, \Lambda_{k} \right\}_{k=1}^{K_+},\{z_{n'k}\}_{n' \neq n, n'\leq\eta},z_{nk}=1;
+	\eta,\tau,\zeta \right) 
+	P\left(z_{nk}=1|\{z_{n'k}\}_{n' \neq n, n'\leq\eta}\right)  $$
+	 
+	
+	\item \textbf{ Subspace of 	$\{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk}, \;(k \leq K_+)$}
+	
+	Our goal is to sample from the following conditional distribution:
+	\begin{align*}
+	&\; Q \left(
+	\{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk}| 
+	X^*;
+	\alpha^\theta,\sigma^\theta,\{s_{n'k}\}_{n' \neq n, n'\leq\eta},\{z_{n'k}\}_{n'=1}^\eta,\Lambda_k;
+	\eta,\tau,\zeta
+	\right) \\
+	\propto & \; Q(X^*|\psi;\eta,\tau,\zeta) 	
+		P\left(
+			\{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk} |
+			\alpha^\theta,\sigma^\theta,\{s_{n'k}\}_{n' \neq n, n'\leq\eta},z_{nk},\Lambda_k
+		\right) \\
+	\propto  &\; Q \left( \{x_{nt}^*\}_{t=1}^{T_n} | \left\{ \{\epsilon_{nkt}\}_{t=1}^{T_n}, s_{nk}, \theta_{nk}, z_{nk}, \Lambda_k \right\}_{k=1}^{K_+};
+	\eta,\tau,\zeta \right) \\
+	& \times \prod_{t}^{T_n} P(\epsilon_{nkt}|\alpha^\theta,\sigma^\theta,z_{nk}) \\
+	& \times P(\theta_{nk}|\alpha^\theta,\sigma^\theta,z_{nk}) \\
+	& \times P(s_{nk}|\{s_{n'k}\}_{n' \neq n, n'\leq\eta},\{z_{n'k}\}_{n'=1}^\eta,\Lambda_k).
+	\end{align*}
+	
+	Note that we can use conjugacy rules to derive $P(s_{nk}|\{s_{n'k}\}_{n' \neq n, n'\leq\eta},\{z_{n'k}\}_{n'=1}^\eta,\Lambda_k)$:
+
+	$$ s_{nk}|\{s_{n'k},z_{n'k}\}_{n' \neq n, n'\leq\eta},z_{nk}=1,\Lambda_k \sim \left\{ \begin{array}{cl}
+	0 & if \; m_k=1 \text{ and } \rho_k=1\\
+	1 & if \; m_k=1 \text{ and } \rho_k=0\\
+	\displaystyle Bernoulli\left(\frac{1 + \sum_{n' \neq n, n'\leq\eta} (s_{n'k})}{2 + \sum_{n' \neq n, n'\leq\eta} (z_{n'k})}\right) & \text{otherwise}\\
+	\end{array}\right.$$
+	
+	We must consider two cases here. In the first case, $z_{nk}=0$ and $\{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk}$ are all left to 0 with probability 1. In the second case, where $z_{nk}=1$, we propose a Metropolis within Gibbs approach where the proposal distribution is:
+	\begin{align*}
+	& P\left(
+	\{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk} |
+	\alpha^\theta,\sigma^\theta,\{s_{n'k}\}_{n' \neq n, n'\leq\eta},z_{nk},\Lambda_k
+	\right) \\
+	=	& \prod_{t}^{T_n} P(\epsilon_{nkt}|\alpha^\theta,\sigma^\theta,z_{nk}) \\
+	& \times P(\theta_{nk}|\alpha^\theta,\sigma^\theta,z_{nk}) \\
+	& \times P(s_{nk}|\{s_{n'k}\}_{n' \neq n, n'\leq\eta},\{z_{n'k}\}_{n'=1}^\eta,\Lambda_k) \\
+	\end{align*}
+	
+	This distribution is conveniently chosen to cancel out with the second part of our target distribution in the Metropolis-Hastings acceptance ratio, which becomes the ratio of the Quasi-likelihoods:
+	
+		$$\min\left\{ 1 ,   \frac{
+		Q(X^*|\psi^*;\eta,\tau,\zeta) 
+	}{
+		Q(X^*|\psi;\eta,\tau,\zeta) 
+	}  \right\}$$
+	
+	\item \textbf{Subspace of $\left\{ \{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk},z_{nk} \right\}_{K_+}^{\infty}$}
+	
+	Similarly, we propose a Metropolis within Gibbs approach where the proposal distribution is derived from the prior and can be decomposed as follow:
+	\begin{align*}
+		& P\left(\left\{ \{\epsilon_{nkt}\}_{t=1}^{T_n}, s_{nk}, \theta_{nk},z_{nk} \right\}_{K_+}^{\infty}|\alpha^\theta,\sigma^\theta,\left\{\{z_{n'k}=0\}_{n' \neq n, n'\leq\eta}\right\}_{K_+}^{\infty}\right) \\
+		=	& P\left(\left\{z_{nk} \right\}_{K_+}^{\infty}|\{z_{n'k}=0\}_{n' \neq n, n'\leq\eta}\right) \prod_{K_+}^{\infty} P\left(\left\{ \{\epsilon_{nkt}\}_{t=1}^{T_n}, s_{nk}, \theta_{nk} \right\}_{K_+}^{\infty}|\alpha^\theta,\sigma^\theta,\left\{z_{nk} \right\}_{K_+}^{\infty} \right) \\
+		=	& P\left(\left\{z_{nk} \right\}_{K_+}^{\infty}|\{z_{n'k}=0\}_{n' \neq n, n'\leq\eta}\right) \\
+		& \times \prod_{K_+}^{\infty} \prod_{t}^{T_n} P(\epsilon_{nkt}|\alpha^\theta,\sigma^\theta,z_{nk}) \\
+		& \times \prod_{K_+}^{\infty} P\left( \theta_{nk}  | \alpha^\theta,\sigma^\theta, z_{nk}\right) \\
+		& \times \prod_{K_+}^{\infty} P\left( s_{nk} |z_{nk} \right) \\
+	\end{align*}
+	Note that according to our prior, if $z_{nk}=0$, then $\{\epsilon_{nkt}\}_{t=1}^T, s_{nk}, \theta_{nk}$ are all $0$ with certainty. 
+	
+	The distribution $P\left(\left\{z_{nk} \right\}_{K_+}^{\infty}|\{z_{n'k}=0\}_{n' \neq n, n'\leq\eta}\right)$ requires more attention. It can be seen as two separate elements. First a distribution over the number $k^*$ of classes for which $z_{nk}=1$. Second, assuming some ordering on the $\Lambda_{k}$, a distribution to determine which of these classes have $z_{nk}=1$. Once the classes $\Lambda_{k}$ have been determined, a reordering of the labels $k$ can be done to assign the indexes between $K_++1$ and $K_++k^*$ to these classes. We will denote the new proposed number of classes with non zero columns as $K_+^*$. Consequently, we can rewrite this distribution as:
+	$$ P\left(\left\{z_{nk} \right\}_{K_+}^{\infty}|\{z_{n'k}=0\}_{n' \neq n, n'\leq\eta}\right) = P(k^*) \prod_{k=K_++1}^{K_+^*}P(\Lambda_{k}).$$
+	
+	The distribution $P(k^*)$ can be derived from our prior and is $Poisson(\frac{\alpha^z \beta^z}{\beta^z+\eta-1})$ \citep
+	{griffiths2011indian}. 	
+	
+	The proposal  $\left\{ \{\epsilon_{nkt}^*\}_{t=1}^T, s_{nk}^*, \theta_{nk}^*,z_{nk}^* \right\}_{K_+}^{\infty}$ being sampled from the prior, the Metropolis-Hastings acceptance ratio is the ratio of the Quasi-likelihoods:
+		$$\min\left\{ 1 ,   \frac{
+			Q(X^*|\psi^*;\eta,\tau,\zeta) 
+	}{
+		Q(X^*|\psi;\eta,\tau,\zeta) 
+	}  \right\}$$
+	
+	\item \textbf{Subspace of $\left( \alpha^\theta, \sigma^\theta \right) $}
+	
+	Our goal is to sample from the distribution $P \left( \alpha^\theta, \sigma^\theta|\left\{
+	\{\{\epsilon_{nkt}\}_{t=1}^{T_n}, \theta_{nk} ,z_{nk}\}_k^{K_+}\right\}_{n=1}^\eta \right)$, where  $T_n=\tau$ if $n=\eta$, and $T_n=T$ otherwise. This distribution is independent of $\zeta$.
+	
+	We use a Metropolis-Hastings step with proposal distributions:
+		$$\alpha^* \sim Gamma(1,1)$$
+		$$\sigma^* \sim Gamma(1,1).$$
+	Consequently, the acceptance probability is as follow : 
+	$$\min\left\{ 1 , \prod_{k}^{K_+} \prod_{n}^{\eta} \left( \frac{ 
+		P_\Gamma(\theta_{nk}|\alpha^* \sigma^*,1) \prod_{t}^{T_n} P_\Gamma(\epsilon_{nkt}|\alpha^* (1-\sigma^*),1) 
+	}{
+		P_\Gamma(\theta_{nk}|\alpha^\theta \sigma^\theta,1) \prod_{t}^{T_n} P_\Gamma(\epsilon_{nkt}|\alpha^\theta (1-\sigma^\theta),1) 
+	} \right)^{z_{nk}} \right\}$$
+	where $P_\Gamma(\cdot|\alpha,\beta)$ is the PDF of the $Gamma(\alpha,\beta)$ distribution.
+	
+\end{enumerate}
 
 \textbf{-----------------------------------------------------------------------------------------------}
 
@@ -311,7 +455,7 @@ In this phase, 20 MCMC steps are applied to each particles. Each step consists i
 			\begin{itemize}
 				\item Correction phase: increase $\zeta$ until $ESS_1/P<0.5$ or $\zeta=\infty$ (\textit{see section \ref{sec:correction}})
 				\item Selection phase: re-sample particles within each group based on weight
-				\item Mutation phase: move each particle with an Metropolis-Hastings within Gibbs step using the target density $ Q(\psi_{jp}|\{x_{nt}^*\};\eta,\tau,\zeta) $
+				\item Mutation phase: move each particle with an Metropolis-Hastings within Gibbs step using the target density $ Q(\psi_{jp}|X^*;\eta,\tau,\zeta) $
 			\end{itemize}
 		\end{itemize}
 	\end{itemize}
@@ -432,13 +576,13 @@ The mutation phase do an MCMC step using Gibbs sampling and Metropolis-Hastings 
 	\begin{itemize}
 		\item For $k=1$ to $K_+$
 		\begin{itemize}
-			\item If $\sum_{n' \neq n} z_{n'k} > 0 $:
+			\item If $\sum_{n' \neq n, n'\leq\eta} z_{n'k} > 0 $:
 			\begin{itemize}
 				\item Set $\psi^* = \psi_{jp}$
-				\item Draw $z^*_{nk} \sim Bernoulli(\frac{\sum_{n' \neq n} z_{n'k}}{\beta^z + \eta - 1})$
+				\item Draw $z^*_{nk} \sim Bernoulli(\frac{\sum_{n' \neq n, n'\leq\eta} z_{n'k}}{\beta^z + \eta - 1})$
 				\item If $z_{nk} = 1$: Draw $\{s^*_{nk},\theta^*_{nk},\{\epsilon^*_{nkt}\}\}$ (\textit{see below})
 				\item Store new values into $\psi^*$
-				\item Set $\psi_{jp} = \psi^*$ with probability $\min\{1, \frac{ Q(\{x_{nt}^*\}|\psi^*;\eta,\tau,\zeta) }{ Q(\{x_{nt}^*\}|\psi_{jp};\eta,\tau,\zeta)} \}$
+				\item Set $\psi_{jp} = \psi^*$ with probability $\min\{1, \frac{ Q(X^*|\psi^*;\eta,\tau,\zeta) }{ Q(X^*|\psi_{jp};\eta,\tau,\zeta)} \}$
 			\end{itemize}
 			\item Else :
 			\begin{itemize}
@@ -459,7 +603,7 @@ The mutation phase do an MCMC step using Gibbs sampling and Metropolis-Hastings 
 			\end{array}\right.$
 			\item Draw $\theta^*_{n k} \sim Gamma(\sigma^\theta \alpha^\theta,1)$
 			\item Store new values into $\psi^*$
-			\item Set $\psi_{jp} = \psi^*$ with probability $\min\{1, \frac{ Q(\{x_{nt}^*\}|\psi^*;\eta,\tau,\zeta) }{ Q(\{x_{nt}^*\}|\psi_{jp};\eta,\tau,\zeta)} \}$
+			\item Set $\psi_{jp} = \psi^*$ with probability $\min\{1, \frac{ Q(X^*|\psi^*;\eta,\tau,\zeta) }{ Q(X^*|\psi_{jp};\eta,\tau,\zeta)} \}$
 		\end{itemize}
 	\end{itemize}
 	
@@ -480,7 +624,7 @@ For this phase, in order to draw $\{s^*_{nk},\theta^*_{nk},\{\epsilon^*_{nkt}\}\
 	\item Draw $s^*_{n k} \sim \left\{ \begin{array}{cl}
 	0 & if \; m^*_k=1 \text{ and } \rho^*_k=1 \\
 	1 & if \; m^*_k=1 \text{ and } \rho^*_k=0 \\
-	Bernoulli(\frac{1 + \sum_{n'\neq n}^{\eta} s_{nk}}{2+\eta-1}) & \text{otherwise}\\
+	Bernoulli(\frac{1 + \sum_{n'\neq n, n'\leq\eta}^{\eta} s_{nk}}{2+\eta-1}) & \text{otherwise}\\
 	\end{array}\right.$
 	\item Draw $\theta^*_{n k} \sim Gamma(\sigma^\theta \alpha^\theta,1)$
 	\item If $n<\eta$:
